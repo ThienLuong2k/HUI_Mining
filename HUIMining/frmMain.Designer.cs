@@ -32,6 +32,7 @@ namespace HUIMining
             this.lbl_title = new System.Windows.Forms.Label();
             this.txt_filename = new System.Windows.Forms.TextBox();
             this.group_data = new System.Windows.Forms.GroupBox();
+            this.btn_importdata = new System.Windows.Forms.Button();
             this.btn_run = new System.Windows.Forms.Button();
             this.lbl_transactioncount = new System.Windows.Forms.Label();
             this.lbl_transaction = new System.Windows.Forms.Label();
@@ -45,6 +46,7 @@ namespace HUIMining
             this.rdo_fhm = new System.Windows.Forms.RadioButton();
             this.rdo_huiminer = new System.Windows.Forms.RadioButton();
             this.group_results = new System.Windows.Forms.GroupBox();
+            this.btn_export = new System.Windows.Forms.Button();
             this.lbl_showmemory = new System.Windows.Forms.Label();
             this.lbl_showtimer = new System.Windows.Forms.Label();
             this.lbl_memory = new System.Windows.Forms.Label();
@@ -80,6 +82,7 @@ namespace HUIMining
             // 
             // group_data
             // 
+            this.group_data.Controls.Add(this.btn_importdata);
             this.group_data.Controls.Add(this.btn_run);
             this.group_data.Controls.Add(this.lbl_transactioncount);
             this.group_data.Controls.Add(this.lbl_transaction);
@@ -97,6 +100,16 @@ namespace HUIMining
             this.group_data.TabStop = false;
             this.group_data.Text = "Dữ liệu";
             // 
+            // btn_importdata
+            // 
+            this.btn_importdata.Location = new System.Drawing.Point(284, 81);
+            this.btn_importdata.Name = "btn_importdata";
+            this.btn_importdata.Size = new System.Drawing.Size(110, 37);
+            this.btn_importdata.TabIndex = 13;
+            this.btn_importdata.Text = "Đọc dữ liệu";
+            this.btn_importdata.UseVisualStyleBackColor = true;
+            this.btn_importdata.Click += new System.EventHandler(this.btn_importdata_Click);
+            // 
             // btn_run
             // 
             this.btn_run.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -107,6 +120,7 @@ namespace HUIMining
             this.btn_run.TabIndex = 12;
             this.btn_run.Text = "Thực thi";
             this.btn_run.UseVisualStyleBackColor = true;
+            this.btn_run.Click += new System.EventHandler(this.btn_run_Click);
             // 
             // lbl_transactioncount
             // 
@@ -181,6 +195,7 @@ namespace HUIMining
             this.btn_choosefile.TabIndex = 2;
             this.btn_choosefile.Text = "Chọn file txt";
             this.btn_choosefile.UseVisualStyleBackColor = true;
+            this.btn_choosefile.Click += new System.EventHandler(this.btn_choosefile_Click);
             // 
             // group_algo
             // 
@@ -217,6 +232,7 @@ namespace HUIMining
             // 
             // group_results
             // 
+            this.group_results.Controls.Add(this.btn_export);
             this.group_results.Controls.Add(this.lbl_showmemory);
             this.group_results.Controls.Add(this.lbl_showtimer);
             this.group_results.Controls.Add(this.lbl_memory);
@@ -230,6 +246,15 @@ namespace HUIMining
             this.group_results.TabIndex = 4;
             this.group_results.TabStop = false;
             this.group_results.Text = "Kết quả";
+            // 
+            // btn_export
+            // 
+            this.btn_export.Location = new System.Drawing.Point(304, 343);
+            this.btn_export.Name = "btn_export";
+            this.btn_export.Size = new System.Drawing.Size(152, 37);
+            this.btn_export.TabIndex = 18;
+            this.btn_export.Text = "Xuất ra file txt";
+            this.btn_export.UseVisualStyleBackColor = true;
             // 
             // lbl_showmemory
             // 
@@ -322,6 +347,7 @@ namespace HUIMining
             this.btn_refresh.TabIndex = 13;
             this.btn_refresh.Text = "Bắt đầu lại";
             this.btn_refresh.UseVisualStyleBackColor = true;
+            this.btn_refresh.Click += new System.EventHandler(this.btn_refresh_Click);
             // 
             // frmMain
             // 
@@ -378,6 +404,8 @@ namespace HUIMining
         private System.Windows.Forms.Label lbl_huicount;
         private System.Windows.Forms.Label lbl_hui;
         private System.Windows.Forms.Button btn_refresh;
+        private System.Windows.Forms.Button btn_importdata;
+        private System.Windows.Forms.Button btn_export;
     }
 }
 

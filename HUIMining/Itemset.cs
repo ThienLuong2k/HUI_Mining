@@ -8,35 +8,35 @@ namespace HUIMining
 {
     public class Itemset
     {
-        private int[] name;
-        private int twu;
-        private UtilityList ul;
+        private List<int> name;
+        private float u;
 
-        public int[] Name { get => name; set => name = value; }
+        public List<int> Name { get => name; set => name = value; }
 
-        public int TWU { get => twu; set => twu = value; }
-
-        public UtilityList UL { get => ul; set => ul = value; }
+        public float utility { get => u; set => u = value; }
 
         public Itemset()
         {
-            Name = new int[] { 0 };
-            TWU = 0;
-            UL = new UtilityList();
+            Name = new List<int>();
+            utility = 0;
         }
 
-        public Itemset(int[] _name)
+        public Itemset(int _name, float _utility)
         {
-            Name = _name;
-            TWU = 0;
-            UL = new UtilityList();
+            Name = new List<int>(1) { _name };
+            utility = _utility;
         }
 
-        public Itemset(int[] _name, int _twu, UtilityList _ul)
+        public Itemset(List<int> _name, float _utility)
         {
             Name = _name;
-            TWU = _twu;
-            UL = _ul;
+            utility = _utility;
+        }
+
+        public Itemset(Itemset i)
+        {
+            this.Name = i.Name;
+            this.utility = i.utility;
         }
     }
 }

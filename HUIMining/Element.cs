@@ -9,19 +9,20 @@ namespace HUIMining
     public class Element
     {
         private int tid;
-        private int iutil;
-        private int reutil;
+        private float iutil;
+        private float reutil;
 
         public int Tid { get => tid; set => tid = value; }
-        public int Iutil { get => iutil; set => iutil = value; }
-        public int Reutil { get => reutil; set => reutil = value; }
+        public float Iutil { get => iutil; set => iutil = value; }
+        public float Reutil { get => reutil; set => reutil = value; }
 
         public Element()
         {
-            Tid = Iutil = Reutil = 0;
+            Tid = 0;
+            Iutil = Reutil = 0;
         }
 
-        public Element(int _tid, int _iutil, int _reutil)
+        public Element(int _tid, float _iutil, float _reutil)
         {
             Tid = _tid;
             Iutil = _iutil;
