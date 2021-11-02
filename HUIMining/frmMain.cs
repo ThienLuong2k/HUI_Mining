@@ -83,35 +83,38 @@ namespace HUIMining
             {
                 List<Itemset> HUIs;
                 Stopwatch watch = new Stopwatch();
-                //Process currentProcess = Process.GetCurrentProcess();
+                Process currentProcess = Process.GetCurrentProcess();
                 long usedMemory;
                 if(rdo_huiminer.Checked)
                 {
                     watch.Start();
-                    HUIs = xuly.RunAlgo(1, txt_filename.Text, int.Parse(txt_minutil.Text));
+                    HUIs = xuly.RunAlgoHuiminer(txt_filename.Text, int.Parse(txt_minutil.Text));
                     watch.Stop();
                 }
                 else
                 {
                     watch.Start();
-                    HUIs = xuly.RunAlgo(2, txt_filename.Text, int.Parse(txt_minutil.Text));
+                    HUIs = xuly.RunAlgoFhm(txt_filename.Text, int.Parse(txt_minutil.Text));
                     watch.Stop();
                 }
-                //usedMemory = currentProcess.WorkingSet64; // byte
-                //double usedMemoryMB = usedMemory / 1048576.0; // megabyte
-                foreach(Itemset set in HUIs)
+                usedMemory = currentProcess.WorkingSet64; // byte
+                double usedMemoryMB = usedMemory / 1048576.0; // megabyte
+                if(HUIs != null)
                 {
-                    string setName = "";
-                    foreach(int item in set.Name)
+                    foreach (Itemset set in HUIs)
                     {
-                        setName = setName + item.ToString() + ", ";
+                        string setName = "";
+                        foreach (int item in set.Name)
+                        {
+                            setName = setName + item.ToString() + ", ";
+                        }
+                        ListViewItem i = new ListViewItem(setName);
+                        i.SubItems.Add(set.utility.ToString());
+                        list_hui.Items.Add(i);
                     }
-                    ListViewItem i = new ListViewItem(setName);
-                    i.SubItems.Add(set.utility.ToString());
-                    list_hui.Items.Add(i);
                 }
                 lbl_showtimer.Text = watch.ElapsedMilliseconds.ToString() + " ms";
-                //lbl_showmemory.Text = usedMemoryMB.ToString() + " MB";
+                lbl_showmemory.Text = usedMemoryMB.ToString() + " MB";
                 lbl_huicount.Text = list_hui.Items.Count.ToString();
                 btn_refresh.Enabled = true;
                 btn_export.Enabled = true;
