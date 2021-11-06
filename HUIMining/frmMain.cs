@@ -9,7 +9,7 @@ namespace HUIMining
 {
     public partial class frmMain : Form
     {
-        XuLy xuly = new XuLy();
+        XuLy xl = new XuLy();
         public frmMain()
         {
             InitializeComponent();
@@ -47,7 +47,8 @@ namespace HUIMining
             }
             else
             {
-                if(xuly.NhapDuLieu(txt_filename.Text, out int cItem, out int cTransaction))
+                bool imported = xl.NhapDL(txt_filename.Text, out int cItem, out int cTransaction);
+                if(imported)
                 {
                     lbl_itemcount.Text = cItem.ToString();
                     lbl_transactioncount.Text = cTransaction.ToString();
@@ -83,22 +84,25 @@ namespace HUIMining
             {
                 List<Itemset> HUIs;
                 Stopwatch watch = new Stopwatch();
-                Process currentProcess = Process.GetCurrentProcess();
-                long usedMemory;
+                Process cp = Process.GetCurrentProcess();
+                double usedMemory;
                 if(rdo_huiminer.Checked)
                 {
                     watch.Start();
-                    HUIs = xuly.RunAlgoHuiminer(txt_filename.Text, int.Parse(txt_minutil.Text));
+                    HUIs = xl.RunAlgoHuiminer(txt_filename.Text, int.Parse(txt_minutil.Text));
                     watch.Stop();
                 }
                 else
                 {
                     watch.Start();
-                    HUIs = xuly.RunAlgoFhm(txt_filename.Text, int.Parse(txt_minutil.Text));
+                    HUIs = xl.RunAlgoFhm(txt_filename.Text, int.Parse(txt_minutil.Text));
                     watch.Stop();
                 }
-                usedMemory = currentProcess.WorkingSet64; // byte
+                usedMemory = cp.WorkingSet64; // byte
+                //PerformanceCounter ramCounter = new PerformanceCounter("Process", "Working Set", cp.ProcessName);
+                //usedMemory = ramCounter.NextValue();
                 double usedMemoryMB = usedMemory / 1048576.0; // megabyte
+                list_hui.Items.Clear();
                 if(HUIs != null)
                 {
                     foreach (Itemset set in HUIs)
@@ -123,9 +127,10 @@ namespace HUIMining
 
         private void btn_refresh_Click(object sender, EventArgs e)
         {
-            System.GC.Collect();
             list_hui.Items.Clear();
-            xuly.Refresh();
+            xl.Refresh();
+            System.GC.Collect();
+            
             txt_filename.Text = txt_minutil.Text = "";
             lbl_huicount.Text = lbl_itemcount.Text = lbl_transactioncount.Text = "0";
             lbl_showmemory.Text = lbl_showtimer.Text = "0";

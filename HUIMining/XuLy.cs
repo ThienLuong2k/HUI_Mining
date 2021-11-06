@@ -7,7 +7,7 @@ namespace HUIMining
 {
     public class XuLy
     {
-        private Dictionary<int, float> ListItem; // item, TWU
+        public Dictionary<int, float> ListItem; // item, TWU
         private Dictionary<int, Dictionary<int, float>> EUCS;
         // key 1: item 1, key 2: item 2, value: twu(item 1, item 2)
 
@@ -25,40 +25,51 @@ namespace HUIMining
         /// <param name="countItems"> số lượng item trong CSDL </param>
         /// <param name="countTc"> số lượng giao dịch </param>
         /// <returns> nếu đọc DL thành công: true và có số lượng item, số lượng giao dịch</returns>
-        public bool NhapDuLieu(string filename, out int countItems, out int countTc)
+        public bool NhapDL(string filename, out int countItems, out int countTc)
         {
             try
             {
                 string[] db = File.ReadAllLines(filename);
                 for(int i = 0; i < db.Length; i++)
                 {
-                    // if the line is a comment, is empty
-                    // or is a kind of metadata
+                    // Một vài file dữ liệu sẽ có các dòng rỗng, hoặc các dòng
+                    // chú thích hay metadata thì bắt đầu bằng một trong các ký tự '#','%','@'
                     if(String.IsNullOrEmpty(db[i]) || db[i][0] == '#' 
                         || db[i][0] == '%' || db[i][0] == '@')
                     {
                         continue;
                     }
-                    // split the transaction
+                    // else:
+                    // Mỗi giao dịch gồm 3 phần
                     string[] tc = db[i].Split(':');
-                    // the first part is the list of items
+                    // Phần 1: danh sách item xuất hiện trong giao dịch, cách nhau bởi khoảng trắng
                     string[] items = tc[0].Split(' ');
-                    // the second part is transaction utility
+                    // Phần 2: TU của giao dịch
                     float tu = float.Parse(tc[1]);
-                    // for each item, add TU to its TWU
+                    // Phần 3: độ hữu ích của các item trong giao dịch (không lấy ở đây)
+
+                    // với mỗi item, cộng TU vào TWU
                     for(int j = 0; j < items.Length; j++)
                     {
                         int item = int.Parse(items[j]);
+                        // nếu item đã có trong danh sách
                         if (ListItem.ContainsKey(item))
                         {
                             ListItem[item] += tu;
                         }
                         else
                         {
+                            // thêm item vào danh sách, TWU = 0 + TU của giao dịch
                             ListItem.Add(item, tu);
                         }
                     }
                 }
+                // ----- code for testing: print TWU of items (tested --> correct)
+                //foreach(int key in ListItem.Keys)
+                //{
+                //    Console.WriteLine(key.ToString() + ": " + ListItem[key].ToString());
+                //}
+                // ----- end code testing
                 countTc = db.Length;
                 countItems = ListItem.Count;
                 return true;
@@ -70,77 +81,6 @@ namespace HUIMining
             }
         }
 
-        /// <summary>
-        ///     Hàm thực thi thuật toán HUI-Miner
-        /// </summary>
-        /// <param name="pUL"> Utility List của item/itemset P </param>
-        /// <param name="ULs"> Utility List của các mở rộng của P </param>
-        /// <param name="minutil"> minutil </param>
-        /// <returns> Các itemset là HUI </returns>
-        private List<Itemset> HUI_Miner(UtilityList pUL, List<UtilityList> ULs, int minutil)
-        {
-            List<Itemset> result = new List<Itemset>();
-            // for each Utility List of itemset in ULs
-            for(int i = 0; i < ULs.Count; i++)
-            {
-                UtilityList X = ULs[i];
-                if (X.SumIutil >= minutil)
-                    result.Add(new Itemset(X.ID, X.SumIutil));
-                // SumIutil: utility of X in database
-                if(X.SumIutil + X.SumReutil >= minutil)
-                {
-                    // this list will contain the Utility List of pX extensions
-                    List<UtilityList> exULs = new List<UtilityList>();
-                    // for each extension of p appearing after X
-                    // according to the ascending order
-                    for(int j = i + 1; j < ULs.Count; j++)
-                    {
-                        UtilityList Y = ULs[j];
-                        exULs.Add(Construct(pUL, X, Y));
-                    }
-                    result.AddRange(HUI_Miner(X, exULs, minutil));
-                }
-            }
-            return result;
-        }
-
-        private List<Itemset> FHM(UtilityList pUL, List<UtilityList> ULs, int minutil)
-        {
-            List<Itemset> result = new List<Itemset>();
-            for (int i = 0; i < ULs.Count; i++)
-            {
-                UtilityList X = ULs[i];
-                if (X.SumIutil >= minutil)
-                    result.Add(new Itemset(X.ID, X.SumIutil));
-                // SumIutil: utility of X in database
-                if (X.SumIutil + X.SumReutil >= minutil)
-                {
-                    // this list will contain the Utility List of pX extensions
-                    List<UtilityList> exULs = new List<UtilityList>();
-                    // for each extension of p appearing after X
-                    // according to the ascending order
-                    for (int j = i + 1; j < ULs.Count; j++)
-                    {
-                        UtilityList Y = ULs[j];
-                        // ==================== new optimization used in FHM
-                        Dictionary<int, float> mapTWUF = EUCS[X.ID[0]];
-                        if(EUCS.ContainsKey(X.ID[0]))
-                        {
-                            if(EUCS[X.ID[0]].ContainsKey(Y.ID[0]))
-                            {
-                                float twuf = EUCS[X.ID[0]][Y.ID[0]];
-                                if (twuf < minutil)
-                                    continue;
-                            }
-                        }
-                        // ==================== end of new optimization
-                        exULs.Add(Construct(pUL, X, Y));
-                    }
-                    result.AddRange(FHM(X, exULs, minutil));
-                }
-            }
-            return result;
-        }
 
         /// <summary>
         ///     Kết hợp Utility List của Px và Py.
@@ -210,14 +150,14 @@ namespace HUIMining
             List<Element> eList = ul.Elements;
             int left = 0;
             int right = eList.Count - 1;
-            while(left <= right)
+            while (left <= right)
             {
                 int mid = (left + right) / 2;
-                if(eList[mid].Tid < tid)
+                if (eList[mid].Tid < tid)
                 {
                     left = mid + 1;
                 }
-                else if(eList[mid].Tid > tid)
+                else if (eList[mid].Tid > tid)
                 {
                     right = mid - 1;
                 }
@@ -230,240 +170,398 @@ namespace HUIMining
         }
 
         /// <summary>
-        ///     Chạy thuật toán HUI-Miner
-        /// </summary>
-        /// <param name="filename"> đường dẫn file dữ liệu </param>
-        /// <param name="minutil"> minutil </param>
-        /// <returns> Danh sách itemset là HUI </returns>
-        public List<Itemset> RunAlgoHuiminer(string filename, int minutil)
-        {
-            // create a list to store Utility List of items with TWU >= minutil
-            List<UtilityList> ListUL = new List<UtilityList>();
-            // store the Utility List for each item
-            Dictionary<int, UtilityList> ListULofItem = new Dictionary<int, UtilityList>();
-
-            // for each item
-            foreach(int item in ListItem.Keys)
-            {
-                // if the item is promising (TWU >= minutil)
-                if(ListItem[item] >= minutil)
-                {
-                    // create an empty Utility List that we will fill later
-                    UtilityList ul = new UtilityList(item);
-                    ListULofItem.Add(item, ul);
-                    // add the item to list of high TWU items
-                    ListUL.Add(ul);
-                }
-            }
-            // sort the list of high TWU items in ascending order
-            ListUL.Sort(delegate (UtilityList ul1, UtilityList ul2)
-            {
-                return CompareItems(ul1.ID[0], ul1.ID[0]);
-            });
-            // database pass to construct the Utility List of 1-itemsets
-            // having TWU >= minutil (promising items)
-            try
-            {
-                string[] db = File.ReadAllLines(filename);
-                for (int tid = 0; tid < db.Length; tid++)
-                {
-                    // if the line is a comment, is empty
-                    // or is a kind of metadata
-                    if (String.IsNullOrEmpty(db[tid]) || db[tid][0] == '#'
-                        || db[tid][0] == '%' || db[tid][0] == '@')
-                    {
-                        continue;
-                    }
-                    // split the transaction
-                    string[] tc = db[tid].Split(':');
-                    // get the list of items
-                    string[] items = tc[0].Split(' ');
-                    // List<int> list_item = new List<int>();
-
-                    // get the list of utility values corresponding to each item
-                    // for that transaction
-                    string[] utilityValues = tc[2].Split(' ');
-                    // copy the transaction into lists but without items with TWU < minutil
-                    // (revise the transaction)
-                    float reu = 0; // remaining utility
-                    List<Itemset> revisedTc = new List<Itemset>();
-                    // for each item
-                    for(int j = 0; j < items.Length; j++)
-                    {
-                        int item = int.Parse(items[j]);
-                        float utility = float.Parse(utilityValues[j]);
-                        // if the item has enough utility
-                        if(ListItem[item] >= minutil)
-                        {
-                            // add it
-                            Itemset set = new Itemset(item, utility);
-                            revisedTc.Add(set);
-                        }
-                    }
-                    revisedTc.Sort(delegate (Itemset set1, Itemset set2)
-                    {
-                        return CompareItems(set1.Name[0], set2.Name[0]);
-                    });
-                    // for each item left in the transaction
-                    foreach(Itemset iset in revisedTc)
-                    {
-                        // get the utility list of this item
-                        UtilityList ULofItem = ListULofItem[iset.Name[0]];
-
-                        // add a new element to the UL of this item corresponding to this transaction
-                        Element e = new Element(tid + 1, iset.utility, reu);
-
-                        ULofItem.AddElement(e);
-                        // increase the remaining utility
-                        reu += iset.utility;
-                    }
-                }
-            }
-            catch
-            {
-                // the text file cant be open or some exception
-                return null;
-            }
-            return HUI_Miner(null, ListUL, minutil);
-        }
-
-        public List<Itemset> RunAlgoFhm(string filename, int minutil)
-        {
-            // create a list to store Utility List of items with TWU >= minutil
-            List<UtilityList> ListUL = new List<UtilityList>();
-            // store the Utility List for each item
-            Dictionary<int, UtilityList> ListULofItem = new Dictionary<int, UtilityList>();
-
-            // for each item
-            foreach (int item in ListItem.Keys)
-            {
-                // if the item is promising (TWU >= minutil)
-                if (ListItem[item] >= minutil)
-                {
-                    // create an empty Utility List that we will fill later
-                    UtilityList ul = new UtilityList(item);
-                    ListULofItem.Add(item, ul);
-                    // add the item to list of high TWU items
-                    ListUL.Add(ul);
-                }
-            }
-            // sort the list of high TWU items in ascending order
-            ListUL.Sort(delegate (UtilityList ul1, UtilityList ul2)
-            {
-                return CompareItems(ul1.ID[0], ul1.ID[0]);
-            });
-            // database pass to construct the Utility List of 1-itemsets
-            // having TWU >= minutil (promising items)
-            try
-            {
-                string[] db = File.ReadAllLines(filename);
-                for (int tid = 0; tid < db.Length; tid++)
-                {
-                    // if the line is a comment, is empty
-                    // or is a kind of metadata
-                    if (String.IsNullOrEmpty(db[tid]) || db[tid][0] == '#'
-                        || db[tid][0] == '%' || db[tid][0] == '@')
-                    {
-                        continue;
-                    }
-                    // split the transaction
-                    string[] tc = db[tid].Split(':');
-                    // get the list of items
-                    string[] items = tc[0].Split(' ');
-                    // List<int> list_item = new List<int>();
-
-                    // get the list of utility values corresponding to each item
-                    // for that transaction
-                    string[] utilityValues = tc[2].Split(' ');
-                    // copy the transaction into lists but without items with TWU < minutil
-                    // (revise the transaction)
-                    float reu = 0; // remaining utility
-                    float newTU = 0; // new optimization
-                    List<Itemset> revisedTc = new List<Itemset>();
-                    // for each item
-                    for (int j = 0; j < items.Length; j++)
-                    {
-                        int item = int.Parse(items[j]);
-                        int utility = int.Parse(utilityValues[j]);
-                        // if the item has enough utility
-                        if (ListItem[item] >= minutil)
-                        {
-                            // add it
-                            Itemset set = new Itemset(item, utility);
-                            revisedTc.Add(set);
-                            newTU += set.utility; // new optimization
-                        }
-                    }
-                    revisedTc.Sort(delegate (Itemset set1, Itemset set2)
-                    {
-                        return CompareItems(set1.Name[0], set2.Name[0]);
-                    });
-                    // for each item left in the transaction
-                    for(int i = 0; i < revisedTc.Count; i++)
-                    {
-                        Itemset iset = revisedTc[i];
-                        
-                        // get the utility list of this item
-                        UtilityList ULofItem = ListULofItem[iset.Name[0]];
-
-                        // add a new element to the UL of this item corresponding to this transaction
-                        Element e = new Element(tid + 1, iset.utility, reu);
-
-                        ULofItem.AddElement(e);
-                        // increase the remaining utility
-                        reu += iset.utility;
-
-                        // === begin new optimization for FHM (build EUCS) ===
-                        Dictionary<int, float> eucsItem;
-                        if (!EUCS.ContainsKey(iset.Name[0]))
-                        {
-                            eucsItem = new Dictionary<int, float>();
-                            EUCS.Add(iset.Name[0], eucsItem);
-                        }
-                        // for each item left in the transaction
-                        for(int j = i + 1; j < revisedTc.Count; j++)
-                        {
-                            Itemset itemAfter = revisedTc[j]; // iset: item x; this: item y
-                            // if exist (x, y, c) in EUCS
-                            if((EUCS[iset.Name[0]]).ContainsKey(itemAfter.Name[0]))
-                            {
-                                // c = twu(x,y) = twu(x,y) + new TU
-                                (EUCS[iset.Name[0]])[itemAfter.Name[0]] += newTU;
-                            }
-                            else
-                            {
-                                // add (x, y, c) with c = new TU
-                                (EUCS[iset.Name[0]]).Add(itemAfter.Name[0], newTU);
-                            }
-                        }
-                        // ===           end optimization of FHM           ===
-                    }
-                }
-            }
-            catch
-            {
-                // the text file cant be open or some exception
-                return null;
-            }
-            return FHM(null, ListUL, minutil);
-        }
-
-        /// <summary>
-        ///     So sánh 2 item
+        ///     Hàm cung cấp 1 số nguyên C để so sánh 2 item
         /// </summary>
         /// <param name="item1"> item 1 </param>
         /// <param name="item2"> item 2 </param>
-        /// <returns> 0: 2 item bằng nhau -> dùng thứ tự từ điển; > 0: item 1 > item 2; ngược lại < 0 </returns>
+        /// <returns>
+        ///     C = TWU(item 1) - TWU(item 2) <br/>
+        ///     Nếu C = 0: 2 item bằng nhau -> dùng thứ tự từ điển
+        /// </returns>
         private int CompareItems(int item1, int item2)
         {
             float compare = ListItem[item1] - ListItem[item2];
-            // if the same, use the lexical order (thứ tự từ điển) otherwise use the TWU
             return (compare == 0) ? item1 - item2 : (int)compare;
         }
 
+        /// <summary>
+        ///     Loại bỏ toàn bộ item trong List item và EUCS
+        /// </summary>
         public void Refresh()
         {
             ListItem.Clear();
+            EUCS.Clear();
+        }
+
+        /// <summary>
+        ///     Hàm biểu diễn thuật toán HUI-Miner.
+        /// </summary>
+        /// <param name="pUL"> Utility List của item/itemset P </param>
+        /// <param name="ULs"> Utility List của các mở rộng của P </param>
+        /// <param name="minutil"> minutil </param>
+        /// <returns> Danh sách các tập hữu ích cao. </returns>
+        private List<Itemset> HUI_Miner(UtilityList pUL, List<UtilityList> ULs, int minutil)
+        {
+            // khởi tạo tập result chứa output là các tập HUI
+            List<Itemset> result = new List<Itemset>();
+            // với mỗi Utility List của Px trong ULs
+            for (int i = 0; i < ULs.Count; i++)
+            {
+                UtilityList X = ULs[i];
+                // Nếu Px là HUI
+                if (X.SumIutil >= minutil)
+                    result.Add(new Itemset(X.ID, X.SumIutil)); // SumIutil: utility của X trong CSDL
+                // Nếu Utility List có thể mở rộng
+                if (X.SumIutil + X.SumReutil >= minutil)
+                {
+                    // tạo list chứa UL của các mở rộng của Px
+                    List<UtilityList> exULs = new List<UtilityList>();
+
+                    // với mỗi Py nằm phía sau Px trong danh sách ULs,
+                    // thực hiện kết hợp UL của Py này với UL của Px
+                    // và đưa vào list trên
+                    for (int j = i + 1; j < ULs.Count; j++)
+                    {
+                        UtilityList Y = ULs[j];
+                        exULs.Add(Construct(pUL, X, Y));
+                    }
+                    // dùng đệ quy gọi lại thuật toán, đưa kết quả vào tập result
+                    result.AddRange(HUI_Miner(X, exULs, minutil));
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        ///     Tìm các tập hữu ích cao dùng thuật toán HUI-Miner.
+        /// </summary>
+        /// <param name="filename"> đường dẫn file dữ liệu </param>
+        /// <param name="minutil"> minutil </param>
+        /// <returns> Danh sách các tập hữu ích cao. </returns>
+        public List<Itemset> RunAlgoHuiminer(string filename, int minutil)
+        {
+            // list chứa Utility List của các item i
+            // thỏa điều kiện TWU(i) >= minutil
+            List<UtilityList> ListUL = new List<UtilityList>();
+            // lưu Utility List của mỗi item
+            Dictionary<int, UtilityList> ListULofItem = new Dictionary<int, UtilityList>();
+
+            // với mỗi item
+            foreach (int item in ListItem.Keys)
+            {
+                // nếu item thỏa điều kiện cắt tỉa (TWU >= minutil)
+                if (ListItem[item] >= minutil)
+                {
+                    // khởi tạo UL của item (UL rỗng)
+                    UtilityList ul = new UtilityList(item);
+                    ListULofItem.Add(item, ul);
+                    // thêm vào list trước, điền từng dòng vào sau
+                    ListUL.Add(ul);
+                }
+            }
+            // sắp xếp các Utility List dựa vào TWU của item
+            ListUL.Sort(delegate (UtilityList ul1, UtilityList ul2)
+            {
+                return CompareItems(ul1.ID[0], ul1.ID[0]);
+            });
+            // quét CSDL để điền từng dòng vào Utility List của từng item
+            // thỏa điều kiện TWU >= minutil
+            try
+            {
+                string[] db = File.ReadAllLines(filename);
+                // với mỗi dòng trong file CSDL
+                for (int tid = 0; tid < db.Length; tid++)
+                {
+                    // Nếu dòng này không phải giao dịch
+                    if (String.IsNullOrEmpty(db[tid]) || db[tid][0] == '#'
+                        || db[tid][0] == '%' || db[tid][0] == '@')
+                    {
+                        continue;
+                    }
+                    // else: 
+                    // Mỗi giao dịch gồm 3 phần
+                    string[] tc = db[tid].Split(':');
+                    // Phần 1: danh sách item xuất hiện trong giao dịch, cách nhau bởi khoảng trắng
+                    string[] items = tc[0].Split(' ');
+                    // Phần 2: giá trị TWU của giao dịch (không lấy ở đây)
+                    // Phần 3: độ hữu ích của các item trong giao dịch
+                    string[] utilityValues = tc[2].Split(' ');
+
+                    // Thực hiện chỉnh sửa giao dịch
+                    float reu = 0; // remaining utility
+                    // Dùng list chứa các item để biểu diễn 1 giao dịch được chỉnh sửa
+                    List<Itemset> revisedTc = new List<Itemset>();
+                    // với mỗi item torng giao dịch
+                    for (int j = 0; j < items.Length; j++)
+                    {
+                        // chuyển các giá trị về số
+                        int item = int.Parse(items[j]);
+                        float utility = float.Parse(utilityValues[j]);
+                        // nếu item có TWU >= minutil
+                        if (ListItem[item] >= minutil)
+                        {
+                            // Thêm item vào giao dịch được chỉnh sửa
+                            Itemset set = new Itemset(item, utility);
+                            revisedTc.Add(set);
+                        }
+                    }
+                    // sắp xếp lại các item tăng dần theo TWU
+                    revisedTc.Sort(delegate (Itemset set1, Itemset set2)
+                    {
+                        return CompareItems(set1.Name[0], set2.Name[0]);
+                    });
+                    // ----- test nhỏ: in ra tên các item trong giao dịch
+                    // ----- sau khi chỉnh sửa (đã test, kết quả đúng)
+                    //foreach (Itemset set in revisedTc)
+                    //{
+                    //    Console.Write(set.Name[0].ToString() + " ");
+                    //}
+                    //Console.WriteLine();
+
+                    // với mỗi item trong giao dịch được chỉnh sửa
+                    foreach (Itemset iset in revisedTc)
+                    {
+                        // Lấy Utility List của item
+                        UtilityList ULofItem = ListULofItem[iset.Name[0]];
+                        // tạo Element của item ứng với giao dịch
+                        Element e = new Element(tid + 1, iset.utility, reu);
+                        // thêm Element vừa tạo vào UL của item
+                        ULofItem.AddElement(e);
+
+                        // *** Do ULofItem, ListULofItem và ListUL là các biến tham chiếu
+                        // *** nên thêm vào ULofItem thì listUL cũng được thêm tương tự
+
+                        // tăng remaining utility cho element tiếp theo
+                        reu += iset.utility;
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+            // ----- test nhỏ: in ra Utility List của các item (đã test, kết quả đúng)
+            //foreach (UtilityList ul in ListUL)
+            //{
+            //    foreach (int i in ul.ID)
+            //        Console.Write(i + " ");
+            //    Console.Write(": ");
+            //    foreach (Element e in ul.Elements)
+            //        Console.Write("(" + e.Tid + ", " + e.Iutil + ", " + e.Reutil + ") ");
+            //    Console.WriteLine();
+            //}
+            return HUI_Miner(null, ListUL, minutil);
+        }
+
+        /// <summary>
+        ///     Hàm biểu diễn thuật toán FHM.
+        /// </summary>
+        /// <param name="pUL"> Utility List của item/itemset P </param>
+        /// <param name="ULs"> Utility List của các mở rộng của P </param>
+        /// <param name="minutil"> minutil </param>
+        /// <returns> Danh sách các tập hữu ích cao. </returns>
+        private List<Itemset> FHM(UtilityList pUL, List<UtilityList> ULs, int minutil)
+        {
+            // khởi tạo tập result chứa output là các tập HUI
+            List<Itemset> result = new List<Itemset>();
+            // với mỗi Utility List của Px trong ULs
+            for (int i = 0; i < ULs.Count; i++)
+            {
+                UtilityList X = ULs[i];
+                // Nếu Px là HUI
+                if (X.SumIutil >= minutil)
+                    result.Add(new Itemset(X.ID, X.SumIutil)); // SumIutil: utility của X trong CSDL
+                // Nếu Utility List có thể mở rộng
+                if (X.SumIutil + X.SumReutil >= minutil)
+                {
+                    // tạo list chứa UL của các mở rộng của Px
+                    List<UtilityList> exULs = new List<UtilityList>();
+
+                    // với mỗi Py nằm phía sau Px trong danh sách ULs, nếu thỏa điều kiện,
+                    // thực hiện kết hợp UL của Py này với UL của Px
+                    // và đưa vào list trên
+                    for (int j = i + 1; j < ULs.Count; j++)
+                    {
+                        UtilityList Y = ULs[j];
+                        // ==================== Phần sử dụng EUCS
+                        // Nếu có x trong EUCS
+                        if (EUCS.ContainsKey(X.ID[0]))
+                        {
+                            // Nếu có (x,y) trong EUCS
+                            if (EUCS[X.ID[0]].ContainsKey(Y.ID[0]))
+                            {
+                                // Nếu TWU(x,y) < minutil: bỏ qua bước kết hợp Utility List
+                                float twuf = EUCS[X.ID[0]][Y.ID[0]];
+                                if (twuf < minutil)
+                                    continue;
+                            }
+                        }
+                        // ==================== Hết phần sử dụng EUCS
+                        exULs.Add(Construct(pUL, X, Y));
+                    }
+                    // dùng đệ quy gọi lại thuật toán, đưa kết quả vào tập result
+                    result.AddRange(FHM(X, exULs, minutil));
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        ///     Tìm các tập hữu ích cao dùng thuật toán FHM
+        /// </summary>
+        /// <param name="filename"> đường dẫn file dữ liệu </param>
+        /// <param name="minutil"> minutil </param>
+        /// <returns> Danh sách các tập hữu ích cao. </returns>
+        public List<Itemset> RunAlgoFhm(string filename, int minutil)
+        {
+            // list chứa Utility List của các item i
+            // thỏa điều kiện TWU(i) >= minutil
+            List<UtilityList> ListUL = new List<UtilityList>();
+            // lưu Utility List của mỗi item
+            Dictionary<int, UtilityList> ListULofItem = new Dictionary<int, UtilityList>();
+
+            // với mỗi item
+            foreach (int item in ListItem.Keys)
+            {
+                // nếu item thỏa điều kiện cắt tỉa (TWU >= minutil)
+                if (ListItem[item] >= minutil)
+                {
+                    // khởi tạo UL của item (UL rỗng)
+                    UtilityList ul = new UtilityList(item);
+                    ListULofItem.Add(item, ul);
+                    // thêm vào list trước, điền từng dòng vào sau
+                    ListUL.Add(ul);
+                }
+            }
+            // sắp xếp các Utility List dựa vào TWU của item
+            ListUL.Sort(delegate (UtilityList ul1, UtilityList ul2)
+            {
+                return CompareItems(ul1.ID[0], ul1.ID[0]);
+            });
+            // quét CSDL để điền từng dòng vào Utility List của từng item
+            // thỏa điều kiện TWU >= minutil
+            try
+            {
+                string[] db = File.ReadAllLines(filename);
+                // với mỗi dòng trong file CSDL
+                for (int tid = 0; tid < db.Length; tid++)
+                {
+                    // Nếu dòng này không phải giao dịch
+                    if (String.IsNullOrEmpty(db[tid]) || db[tid][0] == '#'
+                        || db[tid][0] == '%' || db[tid][0] == '@')
+                    {
+                        continue;
+                    }
+                    // else: lấy các phần thích hợp trong dòng này
+                    // Mỗi giao dịch gồm 3 phần
+                    string[] tc = db[tid].Split(':');
+                    // Phần 1: danh sách item xuất hiện trong giao dịch, cách nhau bởi khoảng trắng
+                    string[] items = tc[0].Split(' ');
+                    // Phần 2: giá trị TWU của giao dịch (không lấy ở đây)
+                    // Phần 3: độ hữu ích của các item trong giao dịch
+                    string[] utilityValues = tc[2].Split(' ');
+
+                    // Thực hiện chỉnh sửa giao dịch
+                    float reu = 0; // remaining utility
+                    float newTU = 0; // TU của giao dịch sau khi chỉnh sửa
+                    // Dùng list chứa các item để biểu diễn 1 giao dịch được chỉnh sửa
+                    List<Itemset> revisedTc = new List<Itemset>();
+                    // với mỗi item torng giao dịch
+                    for (int j = 0; j < items.Length; j++)
+                    {
+                        // chuyển các giá trị về số
+                        int item = int.Parse(items[j]);
+                        int utility = int.Parse(utilityValues[j]);
+                        // nếu item có TWU >= minutil
+                        if (ListItem[item] >= minutil)
+                        {
+                            // Thêm item vào giao dịch được chỉnh sửa
+                            Itemset set = new Itemset(item, utility);
+                            revisedTc.Add(set);
+                            // cộng độ hữu ích của item trong giao dịch
+                            // vào newTU
+                            newTU += set.utility; 
+                        }
+                    }
+                    // sắp xếp lại các item tăng dần theo TWU
+                    revisedTc.Sort(delegate (Itemset set1, Itemset set2)
+                    {
+                        return CompareItems(set1.Name[0], set2.Name[0]);
+                    });
+
+                    // ------ test nhỏ: in ra tên các item trong giao dịch
+                    // ------ sau khi chỉnh sửa (đã test, kết quả đúng)
+                    //foreach (Itemset set in revisedTc)
+                    //{
+                    //    Console.Write(set.Name[0].ToString() + " ");
+                    //}
+                    //Console.WriteLine();
+
+                    // với mỗi item trong giao dịch được chỉnh sửa
+                    for (int i = 0; i < revisedTc.Count; i++)
+                    {
+                        // lấy tên và utility của item đang xét
+                        int item_x = revisedTc[i].Name[0];
+                        float x_utility = revisedTc[i].utility;
+
+                        // Lấy Utility List của item
+                        UtilityList ULofItem = ListULofItem[item_x];
+
+                        // tạo Element của item ứng với giao dịch
+                        Element e = new Element(tid + 1, x_utility, reu);
+                        //thêm Element vừa tạo vào UL của item
+                        ULofItem.AddElement(e);
+
+                        // *** Do ULofItem, ListULofItem và ListUL là các biến tham chiếu
+                        // *** nên thêm vào ULofItem thì listUL cũng được thêm tương tự
+
+                        // tăng remaining utility cho element tiếp theo
+                        reu += x_utility;
+
+                        // ================= xây dựng EUCS
+                        // khai báo danh sách chứa các cặp {y, TWU(x,y)}
+                        Dictionary<int, float> eucsItem;
+                        // Nếu chưa có item x trong EUCS: thêm item x và danh sách item y sau x
+                        if (!EUCS.ContainsKey(item_x))
+                        {
+                            eucsItem = new Dictionary<int, float>();
+                            EUCS.Add(item_x, eucsItem);
+                        }
+                        // với mỗi item y sau x trong giao dịch được chỉnh sửa
+                        for (int j = i + 1; j < revisedTc.Count; j++)
+                        {
+                            int item_y = revisedTc[j].Name[0];
+                            // nếu tồn tại (x, y, c) trong EUCS
+                            if (EUCS[item_x].ContainsKey(item_y))
+                            {
+                                // cộng newTU vào TWU(x,y) hiện tại
+                                EUCS[item_x] [item_y] += newTU;
+                            }
+                            else
+                            {
+                                // thêm item y và newTU vào danh sách item sau x
+                                (EUCS[item_x]).Add(item_y, newTU);
+                            }
+                        }
+                        // ================= kết thúc xây dựng EUCS
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+            // ----- test nhỏ: in ra Utility List của các item (đã test, kết quả đúng)
+            //foreach (UtilityList ul in ListUL)
+            //{
+            //    foreach (int i in ul.ID)
+            //        Console.Write(i);
+            //    Console.Write(": ");
+            //    foreach (Element e in ul.Elements)
+            //        Console.Write("(" + e.Tid + ", " + e.Iutil + ", " + e.Reutil + ") ");
+            //    Console.WriteLine();
+            //}
+            return FHM(null, ListUL, minutil);
         }
     }
 }
