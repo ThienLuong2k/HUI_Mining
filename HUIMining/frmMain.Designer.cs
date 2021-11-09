@@ -255,6 +255,7 @@ namespace HUIMining
             this.btn_export.TabIndex = 18;
             this.btn_export.Text = "Xuất ra file txt";
             this.btn_export.UseVisualStyleBackColor = true;
+            this.btn_export.Click += new System.EventHandler(this.btn_export_Click);
             // 
             // lbl_showmemory
             // 

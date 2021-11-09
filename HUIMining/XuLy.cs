@@ -194,6 +194,43 @@ namespace HUIMining
         }
 
         /// <summary>
+        ///     Xuất ra file text các tập HUI vừa tìm được.
+        /// </summary>
+        /// <param name="filepath"> Đường dẫn file </param>
+        /// <param name="HUIs"> Danh sách tập HUI </param>
+        /// <param name="minutil"> minutil </param>
+        /// <returns>
+        ///     True nếu xuất ra file thành công, ngược lại false.<br/>
+        ///     File xuất ra có cấu trúc: dòng đầu là minutil, các
+        ///     dòng tiếp theo là itemset và utility của chúng.
+        /// </returns>
+        public bool PrintResult(string filepath, List<Itemset> HUIs, int minutil)
+        {
+            try
+            {
+                StreamWriter writer = new StreamWriter(filepath, false);
+                writer.WriteLine("minutil = " + minutil.ToString());
+                if (HUIs != null)
+                {
+                    foreach (Itemset set in HUIs)
+                    {
+                        string name = "";
+                        foreach (int item in set.Name)
+                            name = name + item.ToString() + " ";
+                        writer.WriteLine(name + "#UTIL: " + set.utility.ToString());
+                    }
+                }
+                writer.Close();
+                return true;
+            }
+            catch
+            {
+                filepath = null;
+                return false;
+            }
+        }
+
+        /// <summary>
         ///     Hàm biểu diễn thuật toán HUI-Miner.
         /// </summary>
         /// <param name="pUL"> Utility List của item/itemset P </param>

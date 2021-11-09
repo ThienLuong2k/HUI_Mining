@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 
@@ -9,6 +7,7 @@ namespace HUIMining
 {
     public partial class frmMain : Form
     {
+        List<Itemset> HUIs;
         XuLy xl = new XuLy();
         public frmMain()
         {
@@ -82,7 +81,7 @@ namespace HUIMining
             }
             else
             {
-                List<Itemset> HUIs;
+                
                 Stopwatch watch = new Stopwatch();
                 Process cp = Process.GetCurrentProcess();
                 double usedMemory;
@@ -137,6 +136,38 @@ namespace HUIMining
             btn_run.Enabled = btn_refresh.Enabled = btn_importdata.Enabled = false;
             btn_export.Enabled = false;
             rdo_huiminer.Checked = true;
+        }
+
+        private void btn_export_Click(object sender, EventArgs e)
+        {
+            char[] splitChar = { '_', '.'};
+            string database = txt_filename.Text.Split(splitChar)[0];
+            string algo;
+            if (rdo_fhm.Checked)
+                algo = "FHM";
+            else
+                algo = "HUI-Miner";
+            //string filename = "HUIs_" + database + "_" + algo + ".txt";
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "Text files | *.txt";
+            //save.FileName += filename;
+            if(save.ShowDialog() == DialogResult.OK)
+            {
+                // đề phòng trường hợp người dùng sửa tên file trước
+                string filename = save.FileName;
+                if (xl.PrintResult(filename, HUIs, int.Parse(txt_minutil.Text)))
+                {
+                    DialogResult dr = MessageBox.Show("Xuất ra file thành công. Mở file ngay ?", "Thông báo", MessageBoxButtons.YesNo);
+                    if (dr == DialogResult.Yes)
+                    {
+                        Process.Start(filename);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Xuất ra file không thành công.", "Thông báo");
+                }
+            }
         }
     }
 }
