@@ -45,28 +45,16 @@ namespace HUIMining
             this.group_algo = new System.Windows.Forms.GroupBox();
             this.rdo_fhm = new System.Windows.Forms.RadioButton();
             this.rdo_huiminer = new System.Windows.Forms.RadioButton();
-            this.group_results = new System.Windows.Forms.GroupBox();
-            this.btn_export = new System.Windows.Forms.Button();
-            this.lbl_showmemory = new System.Windows.Forms.Label();
-            this.lbl_showtimer = new System.Windows.Forms.Label();
-            this.lbl_memory = new System.Windows.Forms.Label();
-            this.lbl_time = new System.Windows.Forms.Label();
-            this.list_hui = new System.Windows.Forms.ListView();
-            this.col_items = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.col_utility = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.lbl_huicount = new System.Windows.Forms.Label();
-            this.lbl_hui = new System.Windows.Forms.Label();
             this.btn_refresh = new System.Windows.Forms.Button();
             this.group_data.SuspendLayout();
             this.group_algo.SuspendLayout();
-            this.group_results.SuspendLayout();
             this.SuspendLayout();
             // 
             // lbl_title
             // 
             this.lbl_title.AutoSize = true;
             this.lbl_title.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_title.Location = new System.Drawing.Point(13, 13);
+            this.lbl_title.Location = new System.Drawing.Point(6, 9);
             this.lbl_title.Name = "lbl_title";
             this.lbl_title.Size = new System.Drawing.Size(305, 31);
             this.lbl_title.TabIndex = 0;
@@ -77,7 +65,7 @@ namespace HUIMining
             this.txt_filename.Location = new System.Drawing.Point(64, 40);
             this.txt_filename.Name = "txt_filename";
             this.txt_filename.ReadOnly = true;
-            this.txt_filename.Size = new System.Drawing.Size(330, 26);
+            this.txt_filename.Size = new System.Drawing.Size(344, 26);
             this.txt_filename.TabIndex = 1;
             // 
             // group_data
@@ -93,16 +81,16 @@ namespace HUIMining
             this.group_data.Controls.Add(this.txt_minutil);
             this.group_data.Controls.Add(this.btn_choosefile);
             this.group_data.Controls.Add(this.txt_filename);
-            this.group_data.Location = new System.Drawing.Point(19, 77);
+            this.group_data.Location = new System.Drawing.Point(12, 144);
             this.group_data.Name = "group_data";
-            this.group_data.Size = new System.Drawing.Size(408, 311);
+            this.group_data.Size = new System.Drawing.Size(442, 305);
             this.group_data.TabIndex = 2;
             this.group_data.TabStop = false;
             this.group_data.Text = "Dữ liệu";
             // 
             // btn_importdata
             // 
-            this.btn_importdata.Location = new System.Drawing.Point(284, 81);
+            this.btn_importdata.Location = new System.Drawing.Point(298, 81);
             this.btn_importdata.Name = "btn_importdata";
             this.btn_importdata.Size = new System.Drawing.Size(110, 37);
             this.btn_importdata.TabIndex = 13;
@@ -114,11 +102,11 @@ namespace HUIMining
             // 
             this.btn_run.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_run.ForeColor = System.Drawing.Color.Green;
-            this.btn_run.Location = new System.Drawing.Point(248, 247);
+            this.btn_run.Location = new System.Drawing.Point(226, 247);
             this.btn_run.Name = "btn_run";
-            this.btn_run.Size = new System.Drawing.Size(131, 37);
+            this.btn_run.Size = new System.Drawing.Size(210, 37);
             this.btn_run.TabIndex = 12;
-            this.btn_run.Text = "Thực thi";
+            this.btn_run.Text = "Thực thi và xuất ra file";
             this.btn_run.UseVisualStyleBackColor = true;
             this.btn_run.Click += new System.EventHandler(this.btn_run_Click);
             // 
@@ -201,9 +189,9 @@ namespace HUIMining
             // 
             this.group_algo.Controls.Add(this.rdo_fhm);
             this.group_algo.Controls.Add(this.rdo_huiminer);
-            this.group_algo.Location = new System.Drawing.Point(573, 12);
+            this.group_algo.Location = new System.Drawing.Point(12, 61);
             this.group_algo.Name = "group_algo";
-            this.group_algo.Size = new System.Drawing.Size(336, 59);
+            this.group_algo.Size = new System.Drawing.Size(408, 59);
             this.group_algo.TabIndex = 3;
             this.group_algo.TabStop = false;
             this.group_algo.Text = "thuật toán";
@@ -230,119 +218,11 @@ namespace HUIMining
             this.rdo_huiminer.Text = "HUI-Miner";
             this.rdo_huiminer.UseVisualStyleBackColor = true;
             // 
-            // group_results
-            // 
-            this.group_results.Controls.Add(this.btn_export);
-            this.group_results.Controls.Add(this.lbl_showmemory);
-            this.group_results.Controls.Add(this.lbl_showtimer);
-            this.group_results.Controls.Add(this.lbl_memory);
-            this.group_results.Controls.Add(this.lbl_time);
-            this.group_results.Controls.Add(this.list_hui);
-            this.group_results.Controls.Add(this.lbl_huicount);
-            this.group_results.Controls.Add(this.lbl_hui);
-            this.group_results.Location = new System.Drawing.Point(433, 77);
-            this.group_results.Name = "group_results";
-            this.group_results.Size = new System.Drawing.Size(476, 394);
-            this.group_results.TabIndex = 4;
-            this.group_results.TabStop = false;
-            this.group_results.Text = "Kết quả";
-            // 
-            // btn_export
-            // 
-            this.btn_export.Location = new System.Drawing.Point(304, 343);
-            this.btn_export.Name = "btn_export";
-            this.btn_export.Size = new System.Drawing.Size(152, 37);
-            this.btn_export.TabIndex = 18;
-            this.btn_export.Text = "Xuất ra file txt";
-            this.btn_export.UseVisualStyleBackColor = true;
-            this.btn_export.Click += new System.EventHandler(this.btn_export_Click);
-            // 
-            // lbl_showmemory
-            // 
-            this.lbl_showmemory.AutoSize = true;
-            this.lbl_showmemory.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_showmemory.Location = new System.Drawing.Point(80, 360);
-            this.lbl_showmemory.Name = "lbl_showmemory";
-            this.lbl_showmemory.Size = new System.Drawing.Size(19, 20);
-            this.lbl_showmemory.TabIndex = 17;
-            this.lbl_showmemory.Text = "0";
-            // 
-            // lbl_showtimer
-            // 
-            this.lbl_showtimer.AutoSize = true;
-            this.lbl_showtimer.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_showtimer.Location = new System.Drawing.Point(155, 326);
-            this.lbl_showtimer.Name = "lbl_showtimer";
-            this.lbl_showtimer.Size = new System.Drawing.Size(19, 20);
-            this.lbl_showtimer.TabIndex = 16;
-            this.lbl_showtimer.Text = "0";
-            // 
-            // lbl_memory
-            // 
-            this.lbl_memory.AutoSize = true;
-            this.lbl_memory.Location = new System.Drawing.Point(7, 360);
-            this.lbl_memory.Name = "lbl_memory";
-            this.lbl_memory.Size = new System.Drawing.Size(67, 20);
-            this.lbl_memory.TabIndex = 15;
-            this.lbl_memory.Text = "Bộ nhớ:";
-            // 
-            // lbl_time
-            // 
-            this.lbl_time.AutoSize = true;
-            this.lbl_time.Location = new System.Drawing.Point(7, 326);
-            this.lbl_time.Name = "lbl_time";
-            this.lbl_time.Size = new System.Drawing.Size(142, 20);
-            this.lbl_time.TabIndex = 14;
-            this.lbl_time.Text = "Thời gian thực thi:";
-            // 
-            // list_hui
-            // 
-            this.list_hui.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.col_items,
-            this.col_utility});
-            this.list_hui.FullRowSelect = true;
-            this.list_hui.HideSelection = false;
-            this.list_hui.Location = new System.Drawing.Point(11, 63);
-            this.list_hui.Name = "list_hui";
-            this.list_hui.Size = new System.Drawing.Size(459, 248);
-            this.list_hui.TabIndex = 13;
-            this.list_hui.UseCompatibleStateImageBehavior = false;
-            this.list_hui.View = System.Windows.Forms.View.Details;
-            // 
-            // col_items
-            // 
-            this.col_items.Text = "item / itemset";
-            this.col_items.Width = 330;
-            // 
-            // col_utility
-            // 
-            this.col_utility.Text = "utility";
-            this.col_utility.Width = 98;
-            // 
-            // lbl_huicount
-            // 
-            this.lbl_huicount.AutoSize = true;
-            this.lbl_huicount.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_huicount.Location = new System.Drawing.Point(206, 40);
-            this.lbl_huicount.Name = "lbl_huicount";
-            this.lbl_huicount.Size = new System.Drawing.Size(19, 20);
-            this.lbl_huicount.TabIndex = 12;
-            this.lbl_huicount.Text = "0";
-            // 
-            // lbl_hui
-            // 
-            this.lbl_hui.AutoSize = true;
-            this.lbl_hui.Location = new System.Drawing.Point(7, 40);
-            this.lbl_hui.Name = "lbl_hui";
-            this.lbl_hui.Size = new System.Drawing.Size(193, 20);
-            this.lbl_hui.TabIndex = 0;
-            this.lbl_hui.Text = "Tổng số tập hữu ích cao:";
-            // 
             // btn_refresh
             // 
             this.btn_refresh.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_refresh.ForeColor = System.Drawing.Color.Green;
-            this.btn_refresh.Location = new System.Drawing.Point(19, 420);
+            this.btn_refresh.Location = new System.Drawing.Point(12, 455);
             this.btn_refresh.Name = "btn_refresh";
             this.btn_refresh.Size = new System.Drawing.Size(174, 37);
             this.btn_refresh.TabIndex = 13;
@@ -354,9 +234,8 @@ namespace HUIMining
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(920, 477);
+            this.ClientSize = new System.Drawing.Size(471, 509);
             this.Controls.Add(this.btn_refresh);
-            this.Controls.Add(this.group_results);
             this.Controls.Add(this.group_algo);
             this.Controls.Add(this.group_data);
             this.Controls.Add(this.lbl_title);
@@ -370,8 +249,6 @@ namespace HUIMining
             this.group_data.PerformLayout();
             this.group_algo.ResumeLayout(false);
             this.group_algo.PerformLayout();
-            this.group_results.ResumeLayout(false);
-            this.group_results.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -394,19 +271,8 @@ namespace HUIMining
         private System.Windows.Forms.GroupBox group_algo;
         private System.Windows.Forms.RadioButton rdo_fhm;
         private System.Windows.Forms.RadioButton rdo_huiminer;
-        private System.Windows.Forms.GroupBox group_results;
-        private System.Windows.Forms.Label lbl_showmemory;
-        private System.Windows.Forms.Label lbl_showtimer;
-        private System.Windows.Forms.Label lbl_memory;
-        private System.Windows.Forms.Label lbl_time;
-        private System.Windows.Forms.ListView list_hui;
-        private System.Windows.Forms.ColumnHeader col_items;
-        private System.Windows.Forms.ColumnHeader col_utility;
-        private System.Windows.Forms.Label lbl_huicount;
-        private System.Windows.Forms.Label lbl_hui;
         private System.Windows.Forms.Button btn_refresh;
         private System.Windows.Forms.Button btn_importdata;
-        private System.Windows.Forms.Button btn_export;
     }
 }
 

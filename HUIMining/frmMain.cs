@@ -7,7 +7,6 @@ namespace HUIMining
 {
     public partial class frmMain : Form
     {
-        List<Itemset> HUIs;
         XuLy xl = new XuLy();
         public frmMain()
         {
@@ -17,7 +16,6 @@ namespace HUIMining
         private void frmMain_Load(object sender, EventArgs e)
         {
             btn_run.Enabled = btn_refresh.Enabled = btn_importdata.Enabled = false;
-            btn_export.Enabled = false;
             rdo_huiminer.Checked = true;
         }
 
@@ -46,13 +44,16 @@ namespace HUIMining
             }
             else
             {
-                bool imported = xl.NhapDL(txt_filename.Text, out int cItem, out int cTransaction);
-                if(imported)
+                
+                int cItem, cTransaction;
+                bool imported = xl.NhapDL(txt_filename.Text, out cItem, out cTransaction);
+                if (imported)
                 {
                     lbl_itemcount.Text = cItem.ToString();
                     lbl_transactioncount.Text = cTransaction.ToString();
                     MessageBox.Show("Nhập dữ liệu thành công.", "Thông báo");
                     btn_run.Enabled = true;
+                    group_algo.Enabled = false;
                 }
                 else
                 {
@@ -75,99 +76,78 @@ namespace HUIMining
 
         private void btn_run_Click(object sender, EventArgs e)
         {
+            
             if(string.IsNullOrEmpty(txt_minutil.Text))
             {
                 MessageBox.Show("Chưa nhập minutil !", "Thông báo");
             }
             else
             {
-                
-                Stopwatch watch = new Stopwatch();
-                Process cp = Process.GetCurrentProcess();
-                double usedMemory;
-                if(rdo_huiminer.Checked)
-                {
-                    watch.Start();
-                    HUIs = xl.RunAlgoHuiminer(txt_filename.Text, int.Parse(txt_minutil.Text));
-                    watch.Stop();
-                }
+                SaveFileDialog save = new SaveFileDialog();
+                save.Filter = "Text files | *.txt";
+                // tạo tên file output
+                // lấy tên database: 1. bỏ đuôi .txt
+                string[] inputPath = txt_filename.Text.Split('.')[0].Split('\\');
+                // 2. bỏ phần đường dẫn tuyệt đối
+                string dbName = inputPath[inputPath.Length - 1];
+                // lấy tên thuật toán
+                string algo;
+                if (rdo_huiminer.Checked)
+                    algo = "HuiMiner";
                 else
+                    algo = "FHM";
+                // kết hợp tất cả làm tên file output
+                save.FileName = "HUIs_" + dbName + "_" + algo + "_" 
+                    + DateTime.Now.ToString("ddmmyyyy HHmmss") + ".txt";
+                if(save.ShowDialog() == DialogResult.OK)
                 {
-                    watch.Start();
-                    HUIs = xl.RunAlgoFhm(txt_filename.Text, int.Parse(txt_minutil.Text));
-                    watch.Stop();
-                }
-                usedMemory = cp.WorkingSet64; // byte
-                //PerformanceCounter ramCounter = new PerformanceCounter("Process", "Working Set", cp.ProcessName);
-                //usedMemory = ramCounter.NextValue();
-                double usedMemoryMB = usedMemory / 1048576.0; // megabyte
-                list_hui.Items.Clear();
-                if(HUIs != null)
-                {
-                    foreach (Itemset set in HUIs)
+                    int HuiCount;
+                    string fileout = save.FileName;
+                    // tạo các biến đo lường
+                    Stopwatch watch = new Stopwatch();
+                    Process cp = Process.GetCurrentProcess();
+                    double usedMemory;
+                    if (rdo_huiminer.Checked)
                     {
-                        string setName = "";
-                        foreach (int item in set.Name)
-                        {
-                            setName = setName + item.ToString() + ", ";
-                        }
-                        ListViewItem i = new ListViewItem(setName);
-                        i.SubItems.Add(set.utility.ToString());
-                        list_hui.Items.Add(i);
+                        watch.Start();
+                        xl.RunAlgoHuiminer(txt_filename.Text, fileout, int.Parse(txt_minutil.Text));
+                        watch.Stop();
+                        
                     }
+                    else
+                    {
+                        watch.Start();
+                        xl.RunAlgoFhm(txt_filename.Text, fileout, int.Parse(txt_minutil.Text));
+                        watch.Stop();
+                    }
+                    HuiCount = xl.HuiCount;
+                    usedMemory = cp.WorkingSet64; // byte
+                    //PerformanceCounter ramCounter = new PerformanceCounter("Process", "Working Set", cp.ProcessName);
+                    //usedMemory = ramCounter.NextValue();
+                    double usedMemoryMB = usedMemory / 1048576.0; // megabyte
+                    string textshow = "Thực hiện thành công.\n\n- Số tập hữu ích cao: " + HuiCount.ToString()
+                    + "\n\n- Thời gian: " + watch.ElapsedMilliseconds.ToString()
+                    + " ms\n\n- Bộ nhớ: " + usedMemoryMB.ToString() + " MB\n\nMở file ngay?";
+                    DialogResult dr = MessageBox.Show(textshow, "Thông báo", MessageBoxButtons.YesNo);
+                    if (dr == DialogResult.Yes)
+                    {
+                        Process.Start(save.FileName);
+                    }
+                    btn_refresh.Enabled = true;
                 }
-                lbl_showtimer.Text = watch.ElapsedMilliseconds.ToString() + " ms";
-                lbl_showmemory.Text = usedMemoryMB.ToString() + " MB";
-                lbl_huicount.Text = list_hui.Items.Count.ToString();
-                btn_refresh.Enabled = true;
-                btn_export.Enabled = true;
             }
         }
 
         private void btn_refresh_Click(object sender, EventArgs e)
         {
-            list_hui.Items.Clear();
             xl.Refresh();
             System.GC.Collect();
-            
-            txt_filename.Text = txt_minutil.Text = "";
-            lbl_huicount.Text = lbl_itemcount.Text = lbl_transactioncount.Text = "0";
-            lbl_showmemory.Text = lbl_showtimer.Text = "0";
-            btn_run.Enabled = btn_refresh.Enabled = btn_importdata.Enabled = false;
-            btn_export.Enabled = false;
-            rdo_huiminer.Checked = true;
-        }
 
-        private void btn_export_Click(object sender, EventArgs e)
-        {
-            char[] splitChar = { '_', '.'};
-            string database = txt_filename.Text.Split(splitChar)[0];
-            string algo;
-            if (rdo_fhm.Checked)
-                algo = "FHM";
-            else
-                algo = "HUI-Miner";
-            //string filename = "HUIs_" + database + "_" + algo + ".txt";
-            SaveFileDialog save = new SaveFileDialog();
-            save.Filter = "Text files | *.txt";
-            //save.FileName += filename;
-            if(save.ShowDialog() == DialogResult.OK)
-            {
-                // đề phòng trường hợp người dùng sửa tên file trước
-                string filename = save.FileName;
-                if (xl.PrintResult(filename, HUIs, int.Parse(txt_minutil.Text)))
-                {
-                    DialogResult dr = MessageBox.Show("Xuất ra file thành công. Mở file ngay ?", "Thông báo", MessageBoxButtons.YesNo);
-                    if (dr == DialogResult.Yes)
-                    {
-                        Process.Start(filename);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Xuất ra file không thành công.", "Thông báo");
-                }
-            }
+            group_algo.Enabled = true;
+            txt_minutil.Text = "";
+            lbl_itemcount.Text = lbl_transactioncount.Text = "0";
+            btn_run.Enabled = btn_refresh.Enabled = false;
+            rdo_huiminer.Checked = true;
         }
     }
 }
