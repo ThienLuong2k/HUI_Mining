@@ -46,6 +46,8 @@ namespace HUIMining
             this.rdo_fhm = new System.Windows.Forms.RadioButton();
             this.rdo_huiminer = new System.Windows.Forms.RadioButton();
             this.btn_refresh = new System.Windows.Forms.Button();
+            this.btnExcel = new System.Windows.Forms.Button();
+            this.txtFileExcel = new System.Windows.Forms.TextBox();
             this.group_data.SuspendLayout();
             this.group_algo.SuspendLayout();
             this.SuspendLayout();
@@ -65,13 +67,12 @@ namespace HUIMining
             this.txt_filename.Location = new System.Drawing.Point(64, 40);
             this.txt_filename.Name = "txt_filename";
             this.txt_filename.ReadOnly = true;
-            this.txt_filename.Size = new System.Drawing.Size(344, 26);
+            this.txt_filename.Size = new System.Drawing.Size(448, 26);
             this.txt_filename.TabIndex = 1;
             // 
             // group_data
             // 
             this.group_data.Controls.Add(this.btn_importdata);
-            this.group_data.Controls.Add(this.btn_run);
             this.group_data.Controls.Add(this.lbl_transactioncount);
             this.group_data.Controls.Add(this.lbl_transaction);
             this.group_data.Controls.Add(this.lbl_itemcount);
@@ -83,14 +84,14 @@ namespace HUIMining
             this.group_data.Controls.Add(this.txt_filename);
             this.group_data.Location = new System.Drawing.Point(12, 144);
             this.group_data.Name = "group_data";
-            this.group_data.Size = new System.Drawing.Size(442, 305);
+            this.group_data.Size = new System.Drawing.Size(518, 305);
             this.group_data.TabIndex = 2;
             this.group_data.TabStop = false;
             this.group_data.Text = "Dữ liệu";
             // 
             // btn_importdata
             // 
-            this.btn_importdata.Location = new System.Drawing.Point(298, 81);
+            this.btn_importdata.Location = new System.Drawing.Point(402, 81);
             this.btn_importdata.Name = "btn_importdata";
             this.btn_importdata.Size = new System.Drawing.Size(110, 37);
             this.btn_importdata.TabIndex = 13;
@@ -102,7 +103,7 @@ namespace HUIMining
             // 
             this.btn_run.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_run.ForeColor = System.Drawing.Color.Green;
-            this.btn_run.Location = new System.Drawing.Point(226, 247);
+            this.btn_run.Location = new System.Drawing.Point(320, 514);
             this.btn_run.Name = "btn_run";
             this.btn_run.Size = new System.Drawing.Size(210, 37);
             this.btn_run.TabIndex = 12;
@@ -222,7 +223,7 @@ namespace HUIMining
             // 
             this.btn_refresh.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_refresh.ForeColor = System.Drawing.Color.Green;
-            this.btn_refresh.Location = new System.Drawing.Point(12, 455);
+            this.btn_refresh.Location = new System.Drawing.Point(12, 514);
             this.btn_refresh.Name = "btn_refresh";
             this.btn_refresh.Size = new System.Drawing.Size(174, 37);
             this.btn_refresh.TabIndex = 13;
@@ -230,12 +231,35 @@ namespace HUIMining
             this.btn_refresh.UseVisualStyleBackColor = true;
             this.btn_refresh.Click += new System.EventHandler(this.btn_refresh_Click);
             // 
+            // btnExcel
+            // 
+            this.btnExcel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnExcel.ForeColor = System.Drawing.Color.DarkBlue;
+            this.btnExcel.Location = new System.Drawing.Point(12, 455);
+            this.btnExcel.Name = "btnExcel";
+            this.btnExcel.Size = new System.Drawing.Size(151, 37);
+            this.btnExcel.TabIndex = 14;
+            this.btnExcel.Text = "Tạo file Excel";
+            this.btnExcel.UseVisualStyleBackColor = true;
+            this.btnExcel.Click += new System.EventHandler(this.btnExcel_Click);
+            // 
+            // txtFileExcel
+            // 
+            this.txtFileExcel.Location = new System.Drawing.Point(182, 460);
+            this.txtFileExcel.Name = "txtFileExcel";
+            this.txtFileExcel.ReadOnly = true;
+            this.txtFileExcel.Size = new System.Drawing.Size(348, 26);
+            this.txtFileExcel.TabIndex = 14;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(471, 509);
+            this.ClientSize = new System.Drawing.Size(542, 563);
+            this.Controls.Add(this.txtFileExcel);
+            this.Controls.Add(this.btnExcel);
             this.Controls.Add(this.btn_refresh);
+            this.Controls.Add(this.btn_run);
             this.Controls.Add(this.group_algo);
             this.Controls.Add(this.group_data);
             this.Controls.Add(this.lbl_title);
@@ -273,6 +297,8 @@ namespace HUIMining
         private System.Windows.Forms.RadioButton rdo_huiminer;
         private System.Windows.Forms.Button btn_refresh;
         private System.Windows.Forms.Button btn_importdata;
+        private System.Windows.Forms.Button btnExcel;
+        private System.Windows.Forms.TextBox txtFileExcel;
     }
 }
 

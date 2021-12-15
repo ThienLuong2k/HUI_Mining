@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HUIMining
 {
-    public class Itemset
+    public class Item
     {
         private int name;
         private float u;
@@ -15,19 +15,19 @@ namespace HUIMining
 
         public float utility { get => u; set => u = value; }
 
-        public Itemset()
+        public Item()
         {
             Name = 0;
             utility = 0;
         }
 
-        public Itemset(int _name, float _utility)
+        public Item(int _name, float _utility)
         {
             Name = _name;
             utility = _utility;
         }
 
-        public Itemset(Itemset i)
+        public Item(Item i)
         {
             this.Name = i.Name;
             this.utility = i.utility;
