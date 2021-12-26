@@ -111,77 +111,71 @@ namespace HUIMining
             {
                 SaveFileDialog save = new SaveFileDialog();
                 save.Filter = "Text files | *.txt";
-                
                 // lấy tên thuật toán
                 string algo;
                 if (rdo_huiminer.Checked)
-                    algo = "HuiMiner";
+                    algo = "HUI-Miner";
                 else
                     algo = "FHM";
                 // kết hợp tất cả làm tên file output
-                save.FileName = "HUIs_" + dbName + "_" + algo + "_" 
+                save.FileName = "HUIs_" + dbName + "_" + algo + "_"
                     + DateTime.Now.ToString("ddMMyyyy HHmmss") + ".txt";
-                if(save.ShowDialog() == DialogResult.OK)
+                if (save.ShowDialog() == DialogResult.OK)
                 {
                     int HuiCount;
+                    int minutil = int.Parse(txt_minutil.Text);
                     string fileout = save.FileName;
                     // tạo các biến đo lường
                     Stopwatch watch = new Stopwatch();
                     Process cp = Process.GetCurrentProcess();
-                    double usedMemory;
                     if (huiMiner != null)
                     {
                         watch.Start();
-                        huiMiner.RunAlgoHuiminer(txt_filename.Text, fileout, int.Parse(txt_minutil.Text));
+                        huiMiner.RunAlgoHuiminer(txt_filename.Text, fileout, minutil);
                         watch.Stop();
                         HuiCount = huiMiner.huiCount;
-
                     }
                     else
                     {
                         watch.Start();
-                        fhm.RunAlgoFhm(txt_filename.Text, fileout, int.Parse(txt_minutil.Text));
+                        fhm.RunAlgoFhm(txt_filename.Text, fileout, minutil);
                         watch.Stop();
                         HuiCount = fhm.huiCount;
                     }
-                    
-                    usedMemory = cp.WorkingSet64; // đơn vị byte
-                    //PerformanceCounter ramCounter = new PerformanceCounter("Process", "Working Set", cp.ProcessName);
-                    //usedMemory = ramCounter.NextValue();
-                    double usedMemoryMB = usedMemory / 1048576.0; // đơn vị megabyte
-                    double timeCount = watch.ElapsedMilliseconds; // đơn vị ms
-                    double memoryCount = Math.Round(usedMemoryMB, 2);
+                    long usedMemory = cp.PrivateMemorySize64; // đơn vị byte
+                    long usedMemoryMB = usedMemory / 1048576; // đơn vị megabyte
+                    long timeCount = watch.ElapsedMilliseconds; // đơn vị ms
                     string textshow = "Thực hiện thành công.\n\n- Số tập hữu ích cao: " + HuiCount.ToString()
                     + "\n\n- Thời gian: " + timeCount
-                    + " ms\n\n- Bộ nhớ: " + memoryCount + " MB\n\nGhi thông số vào file Excel ?";
+                    + " ms\n\n- Bộ nhớ: " + usedMemoryMB + " MB\n\nGhi thông số vào file Excel ?";
                     DialogResult dr = MessageBox.Show(textshow, "Thông báo", MessageBoxButtons.YesNo);
                     if (dr == DialogResult.Yes)
                     {
-                        if(info == null) {
+                        if (info == null)
+                        {
                             // tạo file Excel luôn
                             Tao_Excel();
                         }
-                        else if(package == null)
+                        else if (package == null)
                         {
                             package = new ExcelPackage(info);
                         }
                         ExcelWorksheet sheet = package.Workbook.Worksheets["Sheet1"];
                         // nếu ô minutil nằm cột bên trái chưa có giá trị --> ghi giá trị vào cả 2 cột trái và phải
-                        if(sheet.Cells[row, 2].Value == null)
+                        if (sheet.Cells[row, 2].Value == null)
                         {
-                            sheet.Cells[row, 2].Value = int.Parse(txt_minutil.Text);
-                            sheet.Cells[row, 7].Value = int.Parse(txt_minutil.Text);
+                            sheet.Cells[row, 2].Value = minutil;
+                            sheet.Cells[row, 7].Value = minutil;
                         }
                         if (huiMiner != null)
                         {
-                            
-                            sheet.Cells[row, 3].Value = Math.Round(timeCount / 1000, 2); // cột C - đơn vị giây
-                            sheet.Cells[row, 8].Value = memoryCount; // cột H
+                            sheet.Cells[row, 3].Value = timeCount / 1000; // cột C - đơn vị giây
+                            sheet.Cells[row, 8].Value = usedMemoryMB; // cột H
                         }
                         else
                         {
-                            sheet.Cells[row, 4].Value = Math.Round(timeCount / 1000, 2); // cột D - đơn vị giây
-                            sheet.Cells[row, 9].Value = memoryCount; // cột I
+                            sheet.Cells[row, 4].Value = timeCount / 1000; // cột D - đơn vị giây
+                            sheet.Cells[row, 9].Value = usedMemoryMB; // cột I
                         }
                         row++;
                         package.SaveAs(info);

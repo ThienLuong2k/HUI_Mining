@@ -154,8 +154,8 @@ namespace HUIMining
         /// </returns>
         public int CompareItems(int item1, int item2)
         {
-            float compare = ListItem[item2] - ListItem[item1];
-            return (compare == 0) ? item2 - item1 : (int)compare;
+            float compare = ListItem[item1] - ListItem[item2];
+            return (compare == 0) ? item1 - item2 : (int)compare;
         }
 
         /// <summary>

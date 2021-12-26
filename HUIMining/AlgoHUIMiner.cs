@@ -92,15 +92,14 @@ namespace HUIMining
 
                 // Thực hiện chỉnh sửa giao dịch
                 float reu = 0; // remaining utility
-                               // Dùng list chứa các item để biểu diễn 1 giao dịch được chỉnh sửa
+                // Dùng list chứa các item để biểu diễn 1 giao dịch được chỉnh sửa
                 List<Item> revisedTc = new List<Item>();
                 // với mỗi item trong giao dịch
                 for (int j = 0; j < items.Length; j++)
                 {
                     // chuyển các giá trị về số
                     int item = int.Parse(items[j]);
-                    float utility = float.Parse(utilityValues[j]);
-                    // nếu item có TWU >= minutil
+                    float utility = float.Parse(utilityValues[j]);// nếu item có TWU >= minutil
                     if (list_item[item] >= minutil)
                     {
                         // Thêm item vào giao dịch được chỉnh sửa
